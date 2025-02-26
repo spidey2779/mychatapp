@@ -1,24 +1,93 @@
-import { useParams } from "react-router-dom";
-import { sampleChats } from "../../constants/sampledata";
+/* eslint-disable react-hooks/rules-of-hooks */
+import { useNavigate, useParams } from "react-router-dom";
 import Title from "../shared/Title";
 import ChatList from "../specific/ChatList";
 import Header from "./Header";
 import Grid from "@mui/material/Grid2";
 import Profile from "../specific/Profile";
+import { useMyChatsQuery } from "../../redux/api/api";
+import { Drawer, Skeleton } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsMobile } from "../../redux/reducers/misc";
+import {
+  incrementNotifications,
+  setNewMessagesAlert,
+} from "../../redux/reducers/chat";
+import { useErrors, useSocketEvents } from "../../hooks/hook";
+import { getSocket } from "../../socket";
+import {
+  NEW_REQUEST,
+  NEW_MESSAGE_ALERT,
+  REFETCH_CHATS,
+} from "../../constants/events";
+import { useCallback, useEffect } from "react";
+import { getOrSaveFromStorage } from "../../lib/features";
 
 const AppLayout = () => (WrappedComponent) => {
   // eslint-disable-next-line react/display-name
   return (props) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const params = useParams();
     const chatId = params.chatId;
+    const navigate = useNavigate();
+    const socket = getSocket();
+    // console.log(socket.id);
+    const { isMobile } = useSelector((state) => state.misc);
+    const { user } = useSelector((state) => state.auth);
+    const { newMessagesAlert } = useSelector((state) => state.chat);
+
+    const dispatch = useDispatch();
+    const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
+    useErrors([{ isError, error }]);
     const handleDeleteChat = (e, _id, groupChat) => {
       e.preventDefault();
     };
+    useEffect(() => {
+      // console.log("app layout 1")
+      getOrSaveFromStorage({
+        key: NEW_MESSAGE_ALERT,
+        value: newMessagesAlert,
+      });
+    }, [newMessagesAlert]);
+    const handleMobileClose = () => {
+      dispatch(setIsMobile(false));
+    };
+    const newMessageAlertListener = useCallback(
+      (data) => {
+        if (data.chatId === chatId) return;
+        dispatch(setNewMessagesAlert(data));
+      },
+      [chatId, dispatch]
+    );
+    const newRequestListener = useCallback(() => {
+      dispatch(incrementNotifications());
+    }, [dispatch]);
+    const refetchListener = useCallback(() => {
+      refetch();
+      navigate("/");
+    }, [refetch,navigate]);
+    const eventHandlers = {
+      [NEW_MESSAGE_ALERT]: newMessageAlertListener,
+      [NEW_REQUEST]: newRequestListener,
+      [REFETCH_CHATS]: refetchListener,
+    };
+    useSocketEvents(socket, eventHandlers);
     return (
       <>
         <Title title={"Chat App"} />
         <Header />
+        {isLoading ? (
+          <Skeleton />
+        ) : (
+          <Drawer open={isMobile} onClose={handleMobileClose}>
+            <ChatList
+              w="70vw"
+              chats={data?.chats}
+              chatId={chatId}
+              newMessagesAlert={newMessagesAlert}
+              handleDeleteChat={handleDeleteChat}
+            />
+          </Drawer>
+        )}
         <Grid container height={"calc(100vh - 4rem)"} spacing={0}>
           <Grid
             size={{ sm: 4, md: 3 }}
@@ -27,16 +96,19 @@ const AppLayout = () => (WrappedComponent) => {
               display: { xs: "none", sm: "block" },
             }}
           >
-            <ChatList
-              chats={sampleChats}
-              chatId={chatId}
-              newMessagesAlert={[{ chatId, count: 4 }]}
-              onlineUsers={["1", "2"]}
-              handleDeleteChat={(e) => handleDeleteChat(e, _id, groupChat)}
-            />
+            {isLoading ? (
+              <Skeleton />
+            ) : (
+              <ChatList
+                chats={data?.chats}
+                chatId={chatId}
+                newMessagesAlert={newMessagesAlert}
+                handleDeleteChat={handleDeleteChat}
+              />
+            )}
           </Grid>
           <Grid size={{ xs: 12, sm: 8, md: 5, lg: 6 }} height={"100%"}>
-            <WrappedComponent {...props} />
+            <WrappedComponent {...props} chatId={chatId} user={user} />
           </Grid>
           <Grid
             size={{ md: 4, lg: 3 }}
@@ -47,7 +119,7 @@ const AppLayout = () => (WrappedComponent) => {
               bgcolor: "rgba(0,0,0,0.85)",
             }}
           >
-            <Profile/>
+            <Profile user={user} />
           </Grid>
         </Grid>
       </>

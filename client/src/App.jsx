@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectRoute from "./components/auth/ProtectRoute";
 import { LayoutLoader } from "./components/layout/Loaders";
@@ -12,13 +12,42 @@ const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const ChatManagement = lazy(() => import("./pages/admin/ChatManagement"));
 const MessageManagement = lazy(() => import("./pages/admin/MessageManagement"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
-let user = true;
+import axios from "axios";
+import { server } from "./constants/config";
+import { useDispatch, useSelector } from "react-redux";
+import { userExists, userNotExists } from "./redux/reducers/auth";
+import { Toaster } from "react-hot-toast";
+import { SocketProvider } from "./socket";
 const App = () => {
-  return (
+  const { user, loader } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    // console.log("app effect 1")
+    axios
+      .get(`${server}/api/v1/user/me`, { withCredentials: true })
+      .then((res) => {
+        // console.log(res.data);
+        dispatch(userExists(res.data.user));
+      })
+      .catch((error) => {
+        // console.log(error);
+        dispatch(userNotExists());
+      });
+  }, [dispatch]);
+
+  return loader ? (
+    <LayoutLoader />
+  ) : (
     <Router>
       <Suspense fallback={<LayoutLoader />}>
         <Routes>
-          <Route element={<ProtectRoute user={user} redirect="/" />}>
+          <Route
+            element={
+              <SocketProvider>
+                <ProtectRoute user={user} />
+              </SocketProvider>
+            }
+          >
             <Route path="/" element={<Home />} />
             <Route path="/chat/:chatId" element={<Chat />} />
             <Route path="/groups" element={<Groups />} />
@@ -31,14 +60,15 @@ const App = () => {
               </ProtectRoute>
             }
           />
-          <Route path="/admin" element={<AdminLogin/>} />
-          <Route path="/admin/dashboard" element={<Dashboard/>} />
-          <Route path="/admin/chats" element={<ChatManagement/>} />
-          <Route path="/admin/users" element={<UserManagement/>} />
-          <Route path="/admin/messages" element={<MessageManagement/>} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/chats" element={<ChatManagement />} />
+          <Route path="/admin/users" element={<UserManagement />} />
+          <Route path="/admin/messages" element={<MessageManagement />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      <Toaster position="bottom-center" />
     </Router>
   );
 };

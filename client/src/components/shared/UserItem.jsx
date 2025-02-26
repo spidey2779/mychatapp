@@ -1,7 +1,9 @@
+/* eslint-disable react/prop-types */
+import { Add as AddIcon, Remove as RemoveIcon } from "@mui/icons-material";
 import { Avatar, IconButton, ListItem, Stack, Typography } from "@mui/material";
 import { memo } from "react";
-import { Add as AddIcon, Remove as RemoveIcon } from "@mui/icons-material";
-const UserItem = ({ user, handler, handlerIsLoading , isAdded , styling }) => {
+import { transformImage } from "../../lib/features";
+const UserItem = ({ user, handler, handlerIsLoading, isAdded, styling }) => {
   const { name, _id, avatar } = user;
   return (
     <ListItem>
@@ -12,7 +14,7 @@ const UserItem = ({ user, handler, handlerIsLoading , isAdded , styling }) => {
         alignItems={"center"}
         {...styling}
       >
-        <Avatar />
+        <Avatar src={transformImage(avatar)} />
         <Typography
           variant="body1"
           sx={{
@@ -30,16 +32,16 @@ const UserItem = ({ user, handler, handlerIsLoading , isAdded , styling }) => {
         <IconButton
           size="small"
           sx={{
-            bgcolor: isAdded ? "error.main":"primary.main",
+            bgcolor: isAdded ? "error.main" : "primary.main",
             color: "white",
             "&:hover": {
-              bgcolor: isAdded ? "error.dark":"primary.dark",
+              bgcolor: isAdded ? "error.dark" : "primary.dark",
             },
           }}
           onClick={() => handler(_id)}
           disabled={handlerIsLoading}
         >
-          {isAdded ? <RemoveIcon/> : <AddIcon />}
+          {isAdded ? <RemoveIcon /> : <AddIcon />}
         </IconButton>
       </Stack>
     </ListItem>

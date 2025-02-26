@@ -3,6 +3,7 @@ import { Box, Stack, Typography } from "@mui/material";
 import { StyledLink } from "../styles/StyledComponent";
 import { memo } from "react";
 import AvatarCard from "./AvatarCard";
+import { useNavigate, useParams } from "react-router-dom";
 
 const ChatItem = ({
   avatar = [],
@@ -15,9 +16,17 @@ const ChatItem = ({
   index = 0,
   handleDeleteChat,
 }) => {
+  const params = useParams();
+  const navigate = useNavigate();
+  const clickHandler = (e) => {
+    e.preventDefault();
+    if (params.chatId && params.chatId === _id) return;
+    else navigate(`/chat/${_id}`);
+  };
   return (
     <StyledLink
       to={`/chat/${_id}`}
+      onClick={clickHandler}
       onContextMenu={(e) => handleDeleteChat(e, _id, groupChat)}
       // onContextMenu={(e) => console.log(e)}
       sx={{ padding: 0 }}

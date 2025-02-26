@@ -1,14 +1,14 @@
+/* eslint-disable react/prop-types */
 import { Box, Typography } from "@mui/material";
 import { memo } from "react";
 import { lightBlue } from "../../constants/color";
 import moment from "moment";
 import { fileFormat } from "../../lib/features";
 import RenderAttchment from "./RenderAttchment";
-
 const MessageComponent = ({ message, user }) => {
-  const { sender, content, attachments = [], createAt } = message;
+  const { sender, content, attachments = [], createdAt } = message;
   const sameSender = sender?._id === user?._id;
-  const timeAgo = moment(createAt).fromNow();
+  const timeAgo = moment(createdAt).fromNow();
   return (
     <div
       style={{
@@ -27,11 +27,12 @@ const MessageComponent = ({ message, user }) => {
       {content && <Typography>{content}</Typography>}
       {/* Attachments */}
       {attachments.length > 0 &&
-        attachments.map((attachment, index) => {
+        attachments.map((attachment) => {
           const url = attachment.url;
           const file = fileFormat(url);
+          // console.log(url);
           return (
-            <Box key={index}>
+            <Box key={url}>
               <a
                 href={url}
                 target="_blank"

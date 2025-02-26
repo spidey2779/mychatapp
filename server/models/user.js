@@ -13,6 +13,7 @@ const schema = new mongoose.Schema(
     },
     bio: {
       type: String,
+      required: true,
     },
     password: {
       type: String,
@@ -35,7 +36,7 @@ const schema = new mongoose.Schema(
   }
 );
 schema.pre("save", async function (next) {
-  if (!this.isModified("password")) next();
-    this.password = await hash(this.password, 10);
+  if (!this.isModified("password")) return next();
+  this.password = await hash(this.password, 10);
 });
 export const User = mongoose.models.User || mongoose.model("User", schema);
