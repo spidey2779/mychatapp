@@ -21,6 +21,7 @@ import { userExists } from "../redux/reducers/auth";
 import toast from "react-hot-toast";
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const toggleLogin = () => {
     setIsLogin((prev) => !prev);
   };
@@ -32,8 +33,10 @@ const Login = () => {
   const avatar = useFileHandler("single", 5);
   const dispatch = useDispatch();
   const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const toastId = toast.loading("Logging in...");
     try {
-      e.preventDefault();
       const config = {
         withCredentials: true,
         headers: {
@@ -48,12 +51,14 @@ const Login = () => {
         },
         config
       );
-      dispatch(userExists(data?.user));
+      dispatch(userExists(data.user));
 
-      toast.success(data.message);
+      toast.success(data.message, { id: toastId });
     } catch (error) {
       console.error(error);
-      toast.error(error?.response?.data?.message || "Something went wrong");
+      toast.error(error?.response?.data?.message || "Something went wrong",{ id: toastId });
+    } finally {
+      setIsLoading(false);
     }
   };
   const handleSignUp = async (e) => {
@@ -67,17 +72,21 @@ const Login = () => {
     const config = {
       withCredentials: true,
     };
+    const toastId = toast.loading("Signing up...");
+    setIsLoading(true);
     try {
       const { data } = await axios.post(
         `${server}/api/v1/user/new`,
         formData,
         config
       );
-      dispatch(userExists(data?.user));
-      toast.success(data.message);
+      dispatch(userExists(data.user));
+      toast.success(data.message, { id: toastId });
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.message || "Something went wrong");
+      toast.error(error?.response?.data?.message || "Something went wrong",{ id: toastId });
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -142,13 +151,19 @@ const Login = () => {
                   color="primary"
                   type="submit"
                   fullWidth
+                  disabled={isLoading}
                 >
                   Login
                 </Button>
                 <Typography textAlign={"center"} m={"1rem"}>
                   Or
                 </Typography>
-                <Button fullWidth variant="text" onClick={toggleLogin}>
+                <Button
+                  fullWidth
+                  variant="text"
+                  onClick={toggleLogin}
+                  disabled={isLoading}
+                >
                   Sign Up Instead
                 </Button>
               </form>
@@ -261,13 +276,19 @@ const Login = () => {
                   color="primary"
                   type="submit"
                   fullWidth
+                  disabled={isLoading}
                 >
                   Sign Up
                 </Button>
                 <Typography textAlign={"center"} m={"1rem"}>
                   Or
                 </Typography>
-                <Button fullWidth variant="text" onClick={toggleLogin}>
+                <Button
+                  fullWidth
+                  variant="text"
+                  onClick={toggleLogin}
+                  disabled={isLoading}
+                >
                   Login Instead
                 </Button>
               </form>

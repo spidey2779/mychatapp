@@ -6,7 +6,7 @@ const LayoutLoader = () => {
   return (
     <Grid container height={"calc(100vh - 4rem)"} spacing={"1rem"}>
       <Grid
-        size={{ sm: 4, md: 3 }}
+        size={{ sm: 4, md: 3, }}
         height={"100%"}
         sx={{
           display: { xs: "none", sm: "block" },

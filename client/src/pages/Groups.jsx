@@ -251,6 +251,7 @@ const Groups = () => {
         }}
       >
         {IconBtns}
+        {}
         {groupName && (
           <>
             {GroupName}
@@ -310,6 +311,7 @@ const Groups = () => {
             open={confirmDeleteDialog}
             handleClose={closeConfirmDeleteHandler}
             deleteHandler={deleteHandler}
+            isLoadingDeleteChat={isLoadingDeleteChat}
           />
         </Suspense>
       )}

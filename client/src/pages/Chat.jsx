@@ -83,10 +83,13 @@ const Chat = ({ chatId, user }) => {
     }
   }, [messages]);
   useEffect(() => {
-    if (!chatDetails.data?.chat) {
-      return navigate("/");
+    if (!chatDetails.isLoading) {
+      if (chatDetails.isError || !chatDetails.data?.chat) {
+        console.log("Invalid or non-existent chat.");
+        navigate("/");
+      }
     }
-  }, [chatDetails.data]);
+  }, [chatDetails.isLoading, chatDetails.isError, chatDetails.data, navigate]);
   const messageOnChange = (e) => {
     setMessage(e.target.value);
     if (!IamTyping) {
@@ -122,9 +125,10 @@ const Chat = ({ chatId, user }) => {
     [chatId]
   );
   const alertListener = useCallback(
-    (content) => {
+    (data) => {
+      if (data.chatId !== chatId) return;
       const messageForAlert = {
-        content,
+        content: data.message,
         _id: Math.random() * 1000,
         sender: {
           _id: Math.random() * 1000,
@@ -166,7 +170,7 @@ const Chat = ({ chatId, user }) => {
           return <MessageComponent key={i?._id} message={i} user={user} />;
         })}
         {userTyping && <TypingLoader />}
-        <div ref={bottomRef} />
+        <div ref={bottomRef}  />
       </Stack>
       <form
         style={{

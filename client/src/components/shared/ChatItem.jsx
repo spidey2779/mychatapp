@@ -4,7 +4,7 @@ import { StyledLink } from "../styles/StyledComponent";
 import { memo } from "react";
 import AvatarCard from "./AvatarCard";
 import { useNavigate, useParams } from "react-router-dom";
-
+import { motion } from "framer-motion";
 const ChatItem = ({
   avatar = [],
   name,
@@ -31,7 +31,10 @@ const ChatItem = ({
       // onContextMenu={(e) => console.log(e)}
       sx={{ padding: 0 }}
     >
-      <div
+      <motion.div
+        initial={{ opacity: 0, x: -100 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{  delay: index * 0.1 }}
         style={{
           display: "flex",
           gap: "1rem",
@@ -64,7 +67,7 @@ const ChatItem = ({
             }}
           />
         )}
-      </div>
+      </motion.div>
     </StyledLink>
   );
 };
