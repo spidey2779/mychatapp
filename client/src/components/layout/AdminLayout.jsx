@@ -19,7 +19,8 @@ import {
   Message as MessageIcon,
   ExitToApp as ExitToAppIcon,
 } from "@mui/icons-material";
-
+import { useDispatch, useSelector } from "react-redux";
+import { logoutAdmin } from "../../redux/thunks/admin";
 export const adminTabs = [
   {
     name: "Dashboard",
@@ -53,7 +54,10 @@ const StyledLinkTwo = styled(Link)`
 `;
 const Sidebar = ({ w = "100%" }) => {
   const location = useLocation();
-  const logoutHandler = () => {};
+  const dispatch = useDispatch()
+  const logoutHandler = () => {
+    dispatch(logoutAdmin())
+  };
   return (
     <Stack
       width={w}
@@ -98,8 +102,8 @@ const Sidebar = ({ w = "100%" }) => {
     </Stack>
   );
 };
-const isAdmin = true;
 const AdminLayout = ({ children }) => {
+  const { isAdmin } = useSelector((state) => state.auth);
   const [isMobile, setIsMobile] = useState();
   const handleMobile = () => {
     setIsMobile(!isMobile);
@@ -134,10 +138,9 @@ const AdminLayout = ({ children }) => {
         size={{ xs: 12, md: 8, lg: 9 }}
         sx={{
           bgcolor: grayColor,
-          overflowY:"auto"
+          overflowY: "auto",
         }}
         height={"100vh"}
-   
       >
         {children}
       </Grid>

@@ -24,14 +24,13 @@ import { useNavigate } from "react-router-dom";
 import { orange } from "../../constants/color";
 import { server } from "../../constants/config";
 import { userNotExists } from "../../redux/reducers/auth";
+import { resetNotifications } from "../../redux/reducers/chat";
 import {
   setIsMobile,
   setIsNewGroup,
   setIsNotification,
   setIsSearch,
 } from "../../redux/reducers/misc";
-import { resetNotifications } from "../../redux/reducers/chat";
-import { getOrSaveFromStorage } from "../../lib/features";
 const SearchDialog = lazy(() => import("../specific/Search"));
 const NotificationDialog = lazy(() => import("../specific/Notifications"));
 const NewGroupDialog = lazy(() => import("../specific/NewGroups"));

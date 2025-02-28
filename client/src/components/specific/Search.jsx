@@ -1,6 +1,7 @@
 import { useInputValidation } from "6pp";
 import { Search as SearchIcon } from "@mui/icons-material";
 import {
+  CircularProgress,
   Dialog,
   DialogTitle,
   InputAdornment,
@@ -10,14 +11,13 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useAsyncMutation } from "../../hooks/hook";
 import {
   useLazySearchUserQuery,
   useSendFriendRequestMutation,
 } from "../../redux/api/api";
 import { setIsSearch } from "../../redux/reducers/misc";
 import UserItem from "../shared/UserItem";
-import toast from "react-hot-toast";
-import { useAsyncMutation } from "../../hooks/hook";
 const Search = () => {
   const { isSearch } = useSelector((state) => state.misc);
   const [searchUser] = useLazySearchUserQuery();
@@ -28,6 +28,7 @@ const Search = () => {
   const search = useInputValidation("");
   const [users, setUsers] = useState([]);
   const addFriendHandler = async (id) => {
+    
     await sendFriendRequest("Sending Friend Request...", { userId: id });
   };
   const searchCloseHandler = () => {
@@ -35,6 +36,10 @@ const Search = () => {
   };
   useEffect(() => {
     const timeOutId = setTimeout(() => {
+      if (search.value.length === 0) {
+        setUsers([]);
+        return;
+      }
       searchUser(search.value).then(({ data }) => setUsers(data.users));
     }, 1000);
     return () => {
@@ -68,6 +73,17 @@ const Search = () => {
               handlerIsLoading={isLoadingSendFriendRequest}
             />
           ))}
+          {
+            isLoadingSendFriendRequest && <CircularProgress/>
+          }
+          {users.length === 0 &&
+            search.value.length !== 0 &&
+            !isLoadingSendFriendRequest && (
+              <p style={{ textAlign: "center" }}>No user found</p>
+            )}
+          {(!isLoadingSendFriendRequest && search.value.length === 0 )&& (
+            <p style={{ textAlign: "center" }}>Search for users</p>
+          )}
         </List>
       </Stack>
     </Dialog>

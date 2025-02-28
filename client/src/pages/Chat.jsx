@@ -106,6 +106,7 @@ const Chat = ({ chatId, user }) => {
   const newMessagesListener = useCallback(
     (data) => {
       if (data.chatId !== chatId) return;
+      // console.log(data)
       setMessages((prev) => [...prev, data.messageForRealTime]);
     },
     [chatId]
@@ -166,11 +167,12 @@ const Chat = ({ chatId, user }) => {
           overflowY: "auto",
         }}
       >
-        {allMessages?.map((i) => {
-          return <MessageComponent key={i?._id} message={i} user={user} />;
-        })}
+        {allMessages
+          ?.map((i) => {
+            return <MessageComponent key={i._id} message={i} user={user} />;
+          })}
         {userTyping && <TypingLoader />}
-        <div ref={bottomRef}  />
+        <div ref={bottomRef} />
       </Stack>
       <form
         style={{

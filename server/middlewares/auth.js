@@ -23,6 +23,7 @@ export const adminOnly = async (req, res, next) => {
   if (!isMatched) {
     return next(new ErrorHandler("Invalid adminkey", 401));
   }
+  // console.log("admin authenticated", token);
   next();
 };
 export const socketAuthenticator = async (err, socket, next) => {
@@ -31,9 +32,9 @@ export const socketAuthenticator = async (err, socket, next) => {
     const authToken = socket.request.cookies[myToken];
     if (!authToken)
       return next(new ErrorHandler("Please login to access this route", 400));
-    const decodedData = jwt.verify(authToken,process.env.JWT_SECRET);
-    const user= await User.findById(decodedData._id)
-    if(!user) return next(new ErrorHandler("User not found", 401));
+    const decodedData = jwt.verify(authToken, process.env.JWT_SECRET);
+    const user = await User.findById(decodedData._id);
+    if (!user) return next(new ErrorHandler("User not found", 401));
     socket.user = user;
     next();
   } catch (error) {

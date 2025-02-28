@@ -34,7 +34,7 @@ const getAdminData = TryCatch(async (req, res, next) => {
 const allUsers = TryCatch(async (req, res, next) => {
   const users = await User.find({});
   const transformedUsers = await Promise.all(
-    users.map(async ({ name, username, avatar, _id }) => {
+    users.map(async ({ name, username, avatar, _id, createdAt }) => {
       const [groups, friends] = await Promise.all([
         Chat.countDocuments({ groupChat: true, members: _id }),
         Chat.countDocuments({ groupChat: false, members: _id }),
@@ -46,6 +46,7 @@ const allUsers = TryCatch(async (req, res, next) => {
         avatar: avatar.url,
         groups,
         friends,
+        createdAt: createdAt.toLocaleDateString(),
       };
     })
   );
@@ -95,13 +96,14 @@ const allMessages = TryCatch(async (req, res, next) => {
   const messages = await Message.find({})
     .populate("sender", "name avatar")
     .populate("chat", "groupChat");
+    console.log(messages[0])
   const transformedMessages = messages.map(
-    ({ content, attachments, _id, sender, createAt, chat }) => {
+    ({ content, attachments, _id, sender, createdAt, chat }) => {
       return {
         content,
         _id,
-        attachments,
-        createAt,
+        attachments, 
+        createdAt,
         sender: {
           _id: sender._id,
           name: sender.name,
@@ -112,13 +114,15 @@ const allMessages = TryCatch(async (req, res, next) => {
       };
     }
   );
+  console.log("transformed messages",transformedMessages.length);
   return res.status(200).json({
     success: true,
-    transformedMessages,
+    messages: transformedMessages,
   });
 });
 
 const getDashboardStats = TryCatch(async (req, res, next) => {
+  console.log("getDashboard");
   const [groupsCount, usersCount, messagesCount, totalChatsCount] =
     await Promise.all([
       Chat.countDocuments({ groupChat: true }),

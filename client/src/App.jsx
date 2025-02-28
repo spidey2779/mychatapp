@@ -1,7 +1,13 @@
+import axios from "axios";
 import { lazy, Suspense, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import ProtectRoute from "./components/auth/ProtectRoute";
 import { LayoutLoader } from "./components/layout/Loaders";
+import { server } from "./constants/config";
+import { userExists, userNotExists } from "./redux/reducers/auth";
+import { SocketProvider } from "./socket";
 const Home = lazy(() => import("./pages/Home"));
 const Login = lazy(() => import("./pages/Login"));
 const Chat = lazy(() => import("./pages/Chat"));
@@ -12,12 +18,6 @@ const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const ChatManagement = lazy(() => import("./pages/admin/ChatManagement"));
 const MessageManagement = lazy(() => import("./pages/admin/MessageManagement"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
-import axios from "axios";
-import { server } from "./constants/config";
-import { useDispatch, useSelector } from "react-redux";
-import { userExists, userNotExists } from "./redux/reducers/auth";
-import { Toaster } from "react-hot-toast";
-import { SocketProvider } from "./socket";
 const App = () => {
   const { user, loader } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -30,7 +30,7 @@ const App = () => {
         dispatch(userExists(res.data.user));
       })
       .catch((error) => {
-        // console.log(error);
+        console.error(error?.response?.data?.message);
         dispatch(userNotExists());
       });
   }, [dispatch]);

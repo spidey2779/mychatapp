@@ -53,6 +53,7 @@ const uploadFilesToCloudinary = async (files = []) => {
     const formattedResults = results.map((result) => ({
       public_id: result.public_id,
       url: result.secure_url,
+      // type:result.resource_type
     }));
     // console.log("upload complete");
     return formattedResults;

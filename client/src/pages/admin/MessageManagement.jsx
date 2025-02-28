@@ -1,4 +1,4 @@
-import { Avatar, Box, Stack } from "@mui/material";
+import { Avatar, Box, Skeleton, Stack } from "@mui/material";
 import AdminLayout from "../../components/layout/AdminLayout";
 import Table from "../../components/shared/Table";
 import { useEffect, useState } from "react";
@@ -6,6 +6,8 @@ import { dashboardData } from "../../constants/sampledata";
 import { fileFormat, transformImage } from "../../lib/features";
 import moment from "moment";
 import RenderAttchment from "../../components/shared/RenderAttchment";
+import { useGetAdminStatsQuery } from "../../redux/api/api";
+import { useErrors } from "../../hooks/hook";
 
 const columns = [
   {
@@ -26,9 +28,7 @@ const columns = [
             const url = i.url;
             const file = fileFormat(url);
             return (
-              <Box
-                key={index}
-              >
+              <Box key={index}>
                 <a
                   href={url}
                   download
@@ -82,6 +82,10 @@ const columns = [
   },
 ];
 const MessageManagement = () => {
+  const { isLoading, data, error, isError } =
+    useGetAdminStatsQuery("admin/messages");
+  console.log(data);
+  useErrors([{ isError, error }]);
   const [rows, setRows] = useState([]);
   useEffect(() => {
     setRows(
@@ -100,12 +104,16 @@ const MessageManagement = () => {
   }, []);
   return (
     <AdminLayout>
-      <Table
-        heading={"All Messages"}
-        rows={rows}
-        columns={columns}
-        rowHeight={200}
-      />
+      {isLoading ? (
+        <Skeleton />
+      ) : (
+        <Table
+          heading={"All Messages"}
+          rows={rows}
+          columns={columns}
+          rowHeight={200}
+        />
+      )}
     </AdminLayout>
   );
 };

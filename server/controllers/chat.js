@@ -15,6 +15,7 @@ import {
   uploadFilesToCloudinary,
 } from "../utils/features.js";
 import { ErrorHandler } from "../utils/utility.js";
+import { v4 as uuid } from "uuid";
 
 const newGroupChat = TryCatch(async (req, res, next) => {
   const { name, members } = req.body;
@@ -219,16 +220,18 @@ const sendAttachments = TryCatch(async (req, res, next) => {
     chat: chatId,
   };
   // console.log(messageForDB);
-  const messageForRealtime = {
+  const messageForRealTime = {
     ...messageForDB,
+    _id: uuid(),
     sender: {
       _id: me._id,
       name: me.name,
     },
+    createdAt: new Date().toISOString(),
   };
   const message = await Message.create(messageForDB);
   emitEvent(req, NEW_MESSSAGE, chat.members, {
-    message: messageForRealtime,
+     messageForRealTime,
     chatId,
   });
   emitEvent(req, NEW_MESSAGE_ALERT, chat.members, {
