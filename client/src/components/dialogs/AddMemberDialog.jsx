@@ -8,8 +8,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { sampleUsers } from "../../constants/sampledata";
-import UserItem from "../shared/UserItem";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAsyncMutation, useErrors } from "../../hooks/hook";
@@ -18,6 +16,7 @@ import {
   useAvailableFriendsQuery,
 } from "../../redux/api/api";
 import { setIsAddMember } from "../../redux/reducers/misc";
+import UserItem from "../shared/UserItem";
 const AddMemberDialog = ({ chatId }) => {
   const dispatch = useDispatch();
   const { isAddMember } = useSelector((state) => state.misc);
