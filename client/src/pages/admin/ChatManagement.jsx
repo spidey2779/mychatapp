@@ -1,10 +1,11 @@
+import { Avatar, Skeleton, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
-import Table from "../../components/shared/Table";
-import { Avatar, Stack } from "@mui/material";
-import { dashboardData } from "../../constants/sampledata";
-import { transformImage } from "../../lib/features";
 import AvatarCard from "../../components/shared/AvatarCard";
+import Table from "../../components/shared/Table";
+import { useErrors } from "../../hooks/hook";
+import { transformImage } from "../../lib/features";
+import { useGetAdminStatsQuery } from "../../redux/api/api";
 
 const columns = [
   {
@@ -63,26 +64,35 @@ const columns = [
   },
 ];
 const ChatManagement = () => {
+  const { isLoading, data, error, isError } =
+    useGetAdminStatsQuery("admin/chats");
+  useErrors([{ isError, error }]);
   const [rows, setRows] = useState([]);
   useEffect(() => {
-    setRows(
-      dashboardData.chats.map((chat) => ({
-        ...chat,
-        id: chat._id,
-        avatar: chat.avatar.map((i) => transformImage(i, 50)),
-        members: chat.members.map((member) => {
-          return transformImage(member.avatar, 50);
-        }),
-        creator: {
-          name: chat.creator.name,
-          avatar: transformImage(chat.creator.avatar, 50),
-        },
-      }))
-    );
-  }, []);
+    if (data) {
+      setRows(
+        data.chats.map((chat) => ({
+          ...chat,
+          id: chat._id,
+          avatar: chat.avatar.map((i) => transformImage(i, 50)),
+          members: chat.members.map((member) => {
+            return transformImage(member.avatar, 50);
+          }),
+          creator: {
+            name: chat.creator.name,
+            avatar: transformImage(chat.creator.avatar, 50),
+          },
+        }))
+      );
+    }
+  }, [data]);
   return (
     <AdminLayout>
-      <Table rows={rows} heading={"All Chats"} columns={columns} />
+      {isLoading ? (
+        <Skeleton />
+      ) : (
+        <Table rows={rows} heading={"All Chats"} columns={columns} />
+      )}
     </AdminLayout>
   );
 };

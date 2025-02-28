@@ -57,7 +57,7 @@ const UserManagement = () => {
   const [rows, setRows] = useState([]);
   const { isLoading, data, error, isError } =
     useGetAdminStatsQuery("admin/users");
-  console.log(data); 
+  // console.log(data); 
   useErrors([{ isError, error }]);
   useEffect(() => {
     if (data?.transformedUsers) {
@@ -71,7 +71,7 @@ const UserManagement = () => {
         })
       );
     }
-  }, []);
+  }, [data]);
   return (
     <AdminLayout>
       {isLoading ? (

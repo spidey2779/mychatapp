@@ -1,26 +1,29 @@
+import { v2 as cloudinary } from "cloudinary";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import { errorMiddleware } from "./middlewares/error.js";
-import { connectDB, emitEvent } from "./utils/features.js";
-import { Server } from "socket.io";
 import { createServer } from "http";
+import { Server } from "socket.io";
+import { v4 as uuid } from "uuid";
+import { corsOptions } from "./constants/config.js";
 import {
-  NEW_MESSSAGE,
+  CHAT_JOINED,
+  CHAT_LEFT,
   NEW_MESSAGE_ALERT,
+  NEW_MESSSAGE,
+  ONLINE_USERS,
   START_TYPING,
   STOP_TYPING,
 } from "./constants/events.js";
-import { v4 as uuid } from "uuid";
 import { getSockets } from "./lib/helper.js";
-import { Message } from "./models/message.js";
-import cors from "cors";
-import { v2 as cloudinary } from "cloudinary";
-import { corsOptions } from "./constants/config.js";
 import { socketAuthenticator } from "./middlewares/auth.js";
+import { errorMiddleware } from "./middlewares/error.js";
+import { Message } from "./models/message.js";
+import adminRoute from "./routes/admin.js";
 import chatRoute from "./routes/chat.js";
 import userRoute from "./routes/user.js";
-import adminRoute from "./routes/admin.js";
+import { connectDB } from "./utils/features.js";
 dotenv.config({
   path: "./.env",
 });
@@ -29,7 +32,7 @@ const port = process.env.PORT || 3000;
 export const adminSecretKey = process.env.ADMIN_SECRET_KEY || "spidey";
 export const envMode = process.env.NODE_ENV.trim() || "PRODUCTION";
 export const userSocketIDs = new Map();
-
+const onlineUsers = new Set();
 connectDB(mongoURI);
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -99,9 +102,21 @@ io.on("connection", (socket) => {
     const membersSocket = getSockets(members);
     socket.to(membersSocket).emit(STOP_TYPING, { chatId });
   });
+  socket.on(CHAT_JOINED, ({ userId, members }) => {
+    onlineUsers.add(userId.toString());
+    const membersSocket = getSockets(members);
+    io.to(membersSocket).emit(ONLINE_USERS,Array.from(onlineUsers))
+  });
+  socket.on(CHAT_LEFT, ({ userId, members }) => {
+    onlineUsers.delete(userId.toString());
+    const membersSocket = getSockets(members);
+    io.to(membersSocket).emit(ONLINE_USERS,Array.from(onlineUsers))
+  });
   socket.on("disconnect", () => {
     userSocketIDs.delete(user._id.toString());
-    // console.log("user disconnected");
+    onlineUsers.delete(user._id.toString());
+    socket.broadcast.emit(ONLINE_USERS, Array.from(onlineUsers));
+    // console.log("user disconnected"); 
   });
 });
 

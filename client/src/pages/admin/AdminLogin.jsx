@@ -7,9 +7,7 @@ import { adminLogin, getAdmin } from "../../redux/thunks/admin";
 import { useEffect } from "react";
 const AdminLogin = () => {
   const secretKey = useInputValidation("");
-  const { isAdmin, adminLoading } = useSelector(
-    (state) => state.auth
-  );
+  const { isAdmin, adminLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const submitHandler = (e) => {
     e.preventDefault();
@@ -17,10 +15,14 @@ const AdminLogin = () => {
   };
   useEffect(() => {
     dispatch(getAdmin());
+    
   }, [dispatch]);
 
-  if (isAdmin) return <Navigate to={"/admin/dashboard"} />;
-  return  (
+  if (isAdmin) {
+    const adminPath = localStorage.getItem("adminPath");
+    return <Navigate to={adminPath ? adminPath : "/admin/dashboard"} />;
+  }
+  return (
     <div
       style={{
         backgroundImage: bgGradient,

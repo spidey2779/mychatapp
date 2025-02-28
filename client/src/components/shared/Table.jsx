@@ -1,24 +1,23 @@
+/* eslint-disable react/prop-types */
 import { Container, Paper, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { matBlack } from "../../constants/color";
 import { useState } from "react";
-const Table = ({ rows, columns, heading, rowHeight = 52 }) => {
-    const [paginationModel, setPaginationModel] = useState({
-        page: 0,
-        pageSize: 5, // Default page size
-      });
+
+const Table = ({ rows, columns, heading, rowHeight = 52, totalRows }) => {
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 10, // Default page size
+  });
+
   return (
-    <Container
-      sx={{
-        height: "100vh",
-      }}
-    >
+    <Container sx={{ height: "100vh" }}>
       <Paper
         elevation={3}
         sx={{
           padding: "1rem 4rem",
           borderRadius: "1rem",
-          margn: "auto",
+          margin: "auto", // Fixed typo
           width: "100%",
           overflow: "hidden",
           height: "100%",
@@ -26,7 +25,7 @@ const Table = ({ rows, columns, heading, rowHeight = 52 }) => {
         }}
       >
         <Typography
-          textAlign={"center"}
+          textAlign="center"
           variant="h4"
           sx={{
             margin: "2rem",
@@ -36,19 +35,16 @@ const Table = ({ rows, columns, heading, rowHeight = 52 }) => {
           {heading}
         </Typography>
         <DataGrid
-            rows={rows}
-            columns={columns}
-            rowHeight={rowHeight}
-            pagination
-            paginationMode="server"
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            pageSizeOptions={[5, 10, 20]}
-            rowCount={rows?.length} // Ensure rowCount is provided
-          style={{
-            height: "80%",
-          }}
+          rows={rows}
+          columns={columns}
+          rowHeight={rowHeight}
+          paginationMode="client"
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[ 10, 50,100]} // Ensure pageSize is included
+          rowCount={totalRows} // Should be passed from parent/API
           sx={{
+            height: "80%", // Moved from style to sx
             border: "none",
             ".table-header": {
               bgcolor: matBlack,

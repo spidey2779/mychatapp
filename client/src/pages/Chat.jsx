@@ -16,9 +16,11 @@ import { InputBox } from "../components/styles/StyledComponent";
 import { grayColor, orange } from "../constants/color";
 import {
   ALERT,
+  CHAT_JOINED,
+  CHAT_LEFT,
   NEW_MESSSAGE,
   START_TYPING,
-  STOP_TYPING,
+  STOP_TYPING
 } from "../constants/events";
 import { useErrors, useSocketEvents } from "../hooks/hook";
 import { useChatDetailsQuery, useGetMessagesQuery } from "../redux/api/api";
@@ -53,7 +55,6 @@ const Chat = ({ chatId, user }) => {
     { isError: oldMessagesChunk.isError, error: oldMessagesChunk.error },
   ];
   const members = chatDetails?.data?.chat?.members;
-
   const handleFileOpen = (e) => {
     setFileMenuAnchor(e.currentTarget);
     dispatch(setIsFileMenu(true));
@@ -70,13 +71,15 @@ const Chat = ({ chatId, user }) => {
 
   useEffect(() => {
     dispatch(removeNewMessagesAlert(chatId));
+    socket.emit(CHAT_JOINED, { userId: user._id, members });
     return () => {
       setMessage("");
       setMessages([]);
       setOldMessages([]);
       setPage(1);
+      socket.emit(CHAT_LEFT, { userId: user._id, members });
     };
-  }, [chatId, dispatch]);
+  }, [chatId]);
   useEffect(() => {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
@@ -142,6 +145,7 @@ const Chat = ({ chatId, user }) => {
     },
     [chatId]
   );
+
   const eventHandlers = {
     [NEW_MESSSAGE]: newMessagesListener,
     [ALERT]: alertListener,
@@ -167,10 +171,9 @@ const Chat = ({ chatId, user }) => {
           overflowY: "auto",
         }}
       >
-        {allMessages
-          ?.map((i) => {
-            return <MessageComponent key={i._id} message={i} user={user} />;
-          })}
+        {allMessages?.map((i) => {
+          return <MessageComponent key={i._id} message={i} user={user} />;
+        })}
         {userTyping && <TypingLoader />}
         <div ref={bottomRef} />
       </Stack>

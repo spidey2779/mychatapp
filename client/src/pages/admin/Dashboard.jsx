@@ -20,7 +20,6 @@ import { useErrors } from "../../hooks/hook";
 const Dashboard = () => {
   const { isLoading, data, error, isError } =
     useGetAdminStatsQuery("admin/stats");
-  console.log(data);
   useErrors([{ isError, error }]);
   const stats = data?.stats;
   const Appbar = (

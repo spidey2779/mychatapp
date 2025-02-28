@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import Grid from "@mui/material/Grid2";
 import { grayColor, matBlack } from "../../constants/color";
 import {
@@ -8,7 +9,7 @@ import {
   styled,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, Link, Navigate } from "react-router-dom";
 import {
   Dashboard as DashboardIcon,
@@ -54,10 +55,17 @@ const StyledLinkTwo = styled(Link)`
 `;
 const Sidebar = ({ w = "100%" }) => {
   const location = useLocation();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const { isAdmin } = useSelector((state) => state.auth);
   const logoutHandler = () => {
-    dispatch(logoutAdmin())
+    localStorage.removeItem("adminPath");
+    dispatch(logoutAdmin());
   };
+  useEffect(() => {
+    if (isAdmin) {
+      localStorage.setItem("adminPath", location.pathname);
+    } 
+  }, [location.pathname, isAdmin]);
   return (
     <Stack
       width={w}

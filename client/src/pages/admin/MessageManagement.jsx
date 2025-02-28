@@ -1,13 +1,12 @@
 import { Avatar, Box, Skeleton, Stack } from "@mui/material";
-import AdminLayout from "../../components/layout/AdminLayout";
-import Table from "../../components/shared/Table";
-import { useEffect, useState } from "react";
-import { dashboardData } from "../../constants/sampledata";
-import { fileFormat, transformImage } from "../../lib/features";
 import moment from "moment";
+import { useEffect, useState } from "react";
+import AdminLayout from "../../components/layout/AdminLayout";
 import RenderAttchment from "../../components/shared/RenderAttchment";
-import { useGetAdminStatsQuery } from "../../redux/api/api";
+import Table from "../../components/shared/Table";
 import { useErrors } from "../../hooks/hook";
+import { fileFormat, transformImage } from "../../lib/features";
+import { useGetAdminStatsQuery } from "../../redux/api/api";
 
 const columns = [
   {
@@ -84,24 +83,26 @@ const columns = [
 const MessageManagement = () => {
   const { isLoading, data, error, isError } =
     useGetAdminStatsQuery("admin/messages");
-  console.log(data);
+  // console.log(data);
   useErrors([{ isError, error }]);
   const [rows, setRows] = useState([]);
   useEffect(() => {
-    setRows(
-      dashboardData.messages.map((i) => {
-        return {
-          ...i,
-          id: i._id,
-          sender: {
-            name: i.sender.name,
-            avatar: transformImage(i.sender.avatar, 50),
-          },
-          createdAt: moment(i.createdAt).format("MMMM Do YYYY , h:mm:ss a"),
-        };
-      })
-    );
-  }, []);
+    if (data) {
+      setRows(
+        data.messages.map((i) => {
+          return {
+            ...i,
+            id: i._id,
+            sender: {
+              name: i.sender.name,
+              avatar: transformImage(i.sender.avatar, 50),
+            },
+            createdAt: moment(i.createdAt).format("MMMM Do YYYY , h:mm:ss a"),
+          };
+        })
+      );
+    }
+  }, [data]);
   return (
     <AdminLayout>
       {isLoading ? (
@@ -111,7 +112,8 @@ const MessageManagement = () => {
           heading={"All Messages"}
           rows={rows}
           columns={columns}
-          rowHeight={200}
+          rowHeight={100}
+          
         />
       )}
     </AdminLayout>

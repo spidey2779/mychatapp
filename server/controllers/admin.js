@@ -96,33 +96,35 @@ const allMessages = TryCatch(async (req, res, next) => {
   const messages = await Message.find({})
     .populate("sender", "name avatar")
     .populate("chat", "groupChat");
-    console.log(messages[0])
+
+  if (!messages.length) {
+    return res.status(200).json({ success: true, messages: [] });
+  }
+
   const transformedMessages = messages.map(
-    ({ content, attachments, _id, sender, createdAt, chat }) => {
-      return {
-        content,
-        _id,
-        attachments, 
-        createdAt,
-        sender: {
-          _id: sender._id,
-          name: sender.name,
-          avatar: sender.avatar.url,
-        },
-        chat: chat._id,
-        groupChat: chat.groupChat,
-      };
-    }
+    ({ content, attachments, _id, sender, createdAt, chat }) => ({
+      content,
+      _id,
+      attachments,
+      createdAt,
+      sender: {
+        _id: sender._id,
+        name: sender.name,
+        avatar: sender.avatar?.url || null, // Handle possible undefined avatar
+      },
+      chat: chat?._id || null, // Handle undefined chat
+      groupChat: chat?.groupChat || false, // Handle missing groupChat field
+    })
   );
-  console.log("transformed messages",transformedMessages.length);
+
   return res.status(200).json({
     success: true,
     messages: transformedMessages,
   });
 });
 
+
 const getDashboardStats = TryCatch(async (req, res, next) => {
-  console.log("getDashboard");
   const [groupsCount, usersCount, messagesCount, totalChatsCount] =
     await Promise.all([
       Chat.countDocuments({ groupChat: true }),
