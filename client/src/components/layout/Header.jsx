@@ -21,7 +21,7 @@ import { lazy, Suspense } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { orange } from "../../constants/color";
+import { greenColor } from "../../constants/color";
 import { server } from "../../constants/config";
 import { userNotExists } from "../../redux/reducers/auth";
 import { resetNotifications } from "../../redux/reducers/chat";
@@ -74,7 +74,7 @@ const Header = () => {
         <AppBar
           position="static"
           sx={{
-            bgcolor: orange,
+            bgcolor: greenColor,
           }}
         >
           <Toolbar>
@@ -87,7 +87,7 @@ const Header = () => {
                 },
               }}
             >
-              Chattu
+              Chat App
             </Typography>
             <Box
               sx={{
