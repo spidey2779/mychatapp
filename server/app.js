@@ -124,4 +124,5 @@ app.use(errorMiddleware);
 
 server.listen(port, () => {
   console.log(`Server is listening on port ${port} in ${envMode} mode`);
+  console.log( process.env.CLIENT_URL)
 });
